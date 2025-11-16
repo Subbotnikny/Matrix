@@ -1,0 +1,288 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<style>
+body {
+  margin: 0;
+  background: #000;
+  overflow: hidden;
+  font-family: system-ui;
+  color: #0f0;
+}
+#controlPanel {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid #0f0;
+  padding: 15px;
+  border-radius: 5px;
+  z-index: 1000;
+  color: #0f0;
+  font-size: 12px;
+  max-width: 280px;
+  transition: all 0.3s ease;
+}
+#controlPanel.collapsed {
+  max-width: 50px;
+  padding: 10px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+#controlPanel.collapsed .control-group,
+#controlPanel.collapsed h3 {
+  display: none;
+}
+#toggleBtn {
+  background: #0f0;
+  color: #000;
+  border: 1px solid #0f0;
+  padding: 5px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 11px;
+  width: 100%;
+  margin-bottom: 5px;
+}
+#toggleBtn:hover {
+  background: #00cc00;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+#collapseIndicator {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 255, 0, 0.3);
+  border: 1px solid #0f0;
+  width: 30px;
+  height: 30px;
+  border-radius: 3px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  color: #0f0;
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+#collapseIndicator:hover {
+  background: rgba(0, 255, 0, 0.6);
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+}
+#collapseIndicator.show {
+  display: flex;
+}
+.control-group {
+  margin-bottom: 12px;
+  border-bottom: 1px solid #0f0;
+  padding-bottom: 10px;
+}
+.control-group:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+input[type="range"],
+input[type="number"],
+input[type="color"],
+input[type="text"],
+select {
+  width: 100%;
+  padding: 5px;
+  margin-top: 3px;
+  background: #001a00;
+  border: 1px solid #0f0;
+  color: #0f0;
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+input[type="range"] {
+  padding: 0;
+  height: 20px;
+  cursor: pointer;
+}
+select option {
+  background: #001a00;
+  color: #0f0;
+}
+button {
+  background: #0f0;
+  color: #000;
+  border: 1px solid #0f0;
+  padding: 8px 15px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+  margin-top: 5px;
+}
+button:hover {
+  background: #00cc00;
+}
+.value-display {
+  display: inline-block;
+  margin-left: 5px;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+<canvas></canvas>
+<div id="collapseIndicator" onclick="togglePanel()">N</div>
+<div id="controlPanel">
+  <button id="toggleBtn" onclick="togglePanel()">−</button>
+  <h3 style="margin: 0 0 10px 0; color: #0f0;">MATRIX SETTINGS</h3>
+  <div class="control-group">
+    <label for="fontSize">Size: <span class="value-display" id="fontSizeValue">11</span>px</label>
+    <input type="range" id="fontSize" min="5" max="50" value="11">
+  </div>
+  <div class="control-group">
+    <label for="fontFamily">Font:</label>
+    <select id="fontFamily">
+      <option value="system-ui">System UI</option>
+      <option value="monospace">Monospace</option>
+      <option value="courier">Courier</option>
+      <option value="courier new">Courier New</option>
+      <option value="arial">Arial</option>
+      <option value="verdana">Verdana</option>
+      <option value="times new roman">Times New Roman</option>
+      <option value="georgia">Georgia</option>
+      <option value="consolas">Consolas</option>
+    </select>
+  </div>
+  <div class="control-group">
+    <label for="textColor">Text Color:</label>
+    <input type="color" id="textColor" value="#00ff00">
+  </div>
+  <div class="control-group">
+    <label for="bgColor">Background Color:</label>
+    <input type="color" id="bgColor" value="#000000">
+  </div>
+  <div class="control-group">
+    <label for="opacity">Opacity: <span class="value-display" id="opacityValue">0.05</span></label>
+    <input type="range" id="opacity" min="0" max="1" step="0.01" value="0.05">
+  </div>
+  <div class="control-group">
+    <label for="speed">Speed: <span class="value-display" id="speedValue">123</span>ms</label>
+    <input type="range" id="speed" min="10" max="500" value="123">
+  </div>
+  <div class="control-group">
+    <label for="text">Text:</label>
+    <input type="text" id="text" value="24GLO.com=en 24?????.???=japan 24???.???=china">
+  </div>
+  <button onclick="resetSettings()">RESET</button>
+</div>
+<script>
+const C = document.querySelector('canvas'),
+$ = C.getContext('2d'),
+W = (C.width = window.innerWidth),
+H = (C.height = window.innerHeight);
+let settings = {
+  fontSize: 11,
+  fontFamily: 'system-ui',
+  textColor: '#00ff00',
+  bgColor: '#000000',
+  opacity: 0.05,
+  speed: 123,
+  text: '24GLO.com=en 24?????.???=japan 24???.???=china ?????.???=hindi 24??????=arabic'
+};
+let matrix = settings.text.split('');
+let col = W / settings.fontSize;
+let arr = [];
+for (let i = 0; i < col; i++) arr[i] = 1;
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [0, 255, 0];
+}
+function draw() {
+  const [r, g, b] = hexToRgb(settings.bgColor);
+  $.fillStyle = `rgba(${r},${g},${b},${settings.opacity})`;
+  $.fillRect(0, 0, W, H);
+  $.fillStyle = settings.textColor;
+  $.font = `${settings.fontSize}px ${settings.fontFamily}`;
+  for (let i = 0; i < arr.length; i++) {
+    let txt = matrix[Math.floor(Math.random() * matrix.length)];
+    $.fillText(txt, i * settings.fontSize, arr[i] * settings.fontSize);
+    if (arr[i] * settings.fontSize > H && Math.random() > 0.975) arr[i] = 0;
+    arr[i]++;
+  }
+}
+let intervalId = setInterval(draw, settings.speed);
+document.getElementById('fontSize').addEventListener('input', (e) => {
+  settings.fontSize = parseInt(e.target.value);
+  document.getElementById('fontSizeValue').textContent = settings.fontSize;
+  col = W / settings.fontSize;
+  arr = [];
+  for (let i = 0; i < col; i++) arr[i] = 1;
+});
+document.getElementById('fontFamily').addEventListener('change', (e) => {
+  settings.fontFamily = e.target.value;
+});
+document.getElementById('textColor').addEventListener('change', (e) => {
+  settings.textColor = e.target.value;
+});
+document.getElementById('bgColor').addEventListener('change', (e) => {
+  settings.bgColor = e.target.value;
+});
+document.getElementById('opacity').addEventListener('input', (e) => {
+  settings.opacity = parseFloat(e.target.value);
+  document.getElementById('opacityValue').textContent = settings.opacity.toFixed(2);
+});
+document.getElementById('speed').addEventListener('input', (e) => {
+  settings.speed = parseInt(e.target.value);
+  document.getElementById('speedValue').textContent = settings.speed;
+  clearInterval(intervalId);
+  intervalId = setInterval(draw, settings.speed);
+});
+document.getElementById('text').addEventListener('change', (e) => {
+  settings.text = e.target.value;
+  matrix = settings.text.split('');
+});
+function resetSettings() {
+  settings.fontSize = 11;
+  settings.fontFamily = 'system-ui';
+  settings.textColor = '#00ff00';
+  settings.bgColor = '#000000';
+  settings.opacity = 0.05;
+  settings.speed = 123;
+  settings.text = '24GLO.com=en 24?????.???=japan 24???.???=china ?????.???=hindi 24??????=arabic';
+  document.getElementById('fontSize').value = 11;
+  document.getElementById('fontSizeValue').textContent = '11';
+  document.getElementById('fontFamily').value = 'system-ui';
+  document.getElementById('textColor').value = '#00ff00';
+  document.getElementById('bgColor').value = '#000000';
+  document.getElementById('opacity').value = '0.05';
+  document.getElementById('opacityValue').textContent = '0.05';
+  document.getElementById('speed').value = '123';
+  document.getElementById('speedValue').textContent = '123';
+  document.getElementById('text').value = settings.text;
+  col = W / settings.fontSize;
+  arr = [];
+  for (let i = 0; i < col; i++) arr[i] = 1;
+  clearInterval(intervalId);
+  intervalId = setInterval(draw, settings.speed);
+}
+function togglePanel() {
+  const panel = document.getElementById('controlPanel');
+  const btn = document.getElementById('toggleBtn');
+  const indicator = document.getElementById('collapseIndicator');
+  panel.classList.toggle('collapsed');
+  indicator.classList.toggle('show');
+  btn.textContent = panel.classList.contains('collapsed') ? '+' : '−';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'n') {
+    togglePanel();
+  }
+});
+window.addEventListener('resize', () => location.reload());
+</script>
+</body>
+</html>
