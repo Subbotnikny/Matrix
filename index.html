@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <style>
@@ -12,7 +12,7 @@ body {
 #controlPanel {
   position: fixed;
   top: 10px;
-  left: 10px;
+  right: 10px;
   background: rgba(0, 0, 0, 0.8);
   border: 2px solid #0f0;
   padding: 15px;
@@ -53,27 +53,24 @@ body {
 #collapseIndicator {
   position: fixed;
   top: 10px;
-  left: 10px;
-  background: rgba(0, 255, 0, 0.3);
-  border: 1px solid #0f0;
-  width: 30px;
-  height: 30px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  width: 0;
+  height: 0;
   border-radius: 3px;
   display: none;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   font-weight: bold;
-  color: #0f0;
+  color: transparent;
   z-index: 999;
   transition: all 0.3s ease;
-}
-#collapseIndicator:hover {
-  background: rgba(0, 255, 0, 0.6);
-  box-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+  pointer-events: none;
 }
 #collapseIndicator.show {
-  display: flex;
+  display: none;
 }
 .control-group {
   margin-bottom: 12px;
